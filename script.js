@@ -4,8 +4,7 @@ let mmh3 = murmurhash3_32_gc;
 
 function HashMap() {
 
-    let capacity = 16;
-    
+    let capacity = 16;    
     let buckets = [];
 
     for (let i = 0; i < capacity; i++) {
@@ -20,16 +19,20 @@ function HashMap() {
 
         set: function(key, value) {
             let b = this.hash(key);
-            if (buckets[b].length > 0) {
+            if (buckets[b].length) {
                 for (let entry of buckets[b]) {
                     if (entry.key === key) {
-                        entry.value = value;
+                        entry.value = value;                        
                     } else {
                         buckets[b].push({ key, value });
                     };
+                    break;
                 };
             } else {
                 buckets[b].push({ key, value });
+            };
+            if (this.length()/capacity > 0.75) {
+                this.expand();
             };
         },
 
@@ -76,10 +79,6 @@ function HashMap() {
             return result;
         },
 
-        loadFactor: function() {
-            return this.length()/capacity;
-        },
-
         clear: function() {
             buckets = [];
         },
@@ -112,6 +111,18 @@ function HashMap() {
                 };
             };
             return arr;
+        },
+
+        expand: function() {
+            let temp = this.entries();
+            this.clear();
+            capacity = capacity*2;
+            for (let i = 0; i < capacity; i++) {
+                buckets.push([]);
+            };
+            for (let entry of temp) {
+                this.set(entry[0], entry[1]);
+            };               
         }
     };
 };
